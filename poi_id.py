@@ -7,6 +7,7 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.decomposition import RandomizedPCA
+from sklearn.feature_selection import RFE
 import numpy as np
 sys.path.append("../tools/")
 
@@ -23,12 +24,24 @@ def scale_features(X):
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi','salary', 'deferral_payments',
-        'total_payments', 'bonus', 'shared_receipt_with_poi',
-        'total_stock_value', 'expenses', 'from_this_person_to_poi', 
-        'deferred_income', 'long_term_incentive',
-        'from_poi_to_this_person', 'monetary_incentive', 'poi_contact'] # You will need to use more features
+#features_list = ['poi','salary', 'deferral_payments',
+#        'total_payments', 'bonus', 'shared_receipt_with_poi',
+#        'total_stock_value', 'expenses', 'from_this_person_to_poi', 
+#        'deferred_income', 'long_term_incentive',
+#        'from_poi_to_this_person', 'monetary_incentive', 'poi_contact'] # You will need to use more features
 
+features_list = ['poi','salary', 'deferral_payments',
+        'total_payments', 'bonus', 
+        'total_stock_value', 
+        'expenses', 
+        'deferred_income', 
+        'long_term_incentive',
+        'monetary_incentive',
+        #'salary', 'bonus', 'deferral_payments',
+        'poi_contact'
+        #'shared_receipt_with_poi', 'from_this_person_to_poi', 'from_poi_to_this_person'
+        ] # You will need to use more features
+        
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
 ### Explore the dataset
@@ -89,11 +102,15 @@ for key, value in data_dict.items():
 temp_list_2 = list(filter(lambda d:d['restricted_stock_deferred'] != 'NaN', data_dict_values))
 my_dataset = data_dict
 
-print features_list
+#print features_list
 
 ### Extract features and labels from dataset for local testing
+print features_list
 data = featureFormat(my_dataset, features_list, sort_keys = True)
+print data[1]
 labels, features = targetFeatureSplit(data)
+
+#print features
 
 salary = []
 deferral_payments = []
@@ -120,7 +137,7 @@ plt.show()
 
 ### Scale the features
 scaled_data = scale_features(data)
-print scaled_data[0]   
+#print scaled_data[0]   
 
 
 #labels, features = targetFeatureSplit(data)
@@ -144,7 +161,6 @@ from sklearn.metrics import accuracy_score
 #from sklearn import tree
 #clf_DT = tree.DecisionTreeRegressor()
 
-from sklearn.feature_selection import SelectKBest
 #from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
@@ -160,20 +176,101 @@ from sklearn.grid_search import GridSearchCV
 
 # Example starting point. Try investigating other evaluation techniques!
 from sklearn.cross_validation import train_test_split
+print features[1]
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
 
-### A Naive Bayes classifier combined with PCA is used and its accuracy is tested
+# Select Kbest features    
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2 
+from sklearn.feature_selection import f_classif
+features_train_ar = np.asarray(features_train)
+features_test_ar = np.asarray(features_test)
+print features_train_ar.shape
+print features_train_ar.shape
+labels_train_ar =  np.asarray(labels_train) 
+labels_test_ar =  np.asarray(labels_test)
+print labels_train_ar.shape
+# features_train_new = SelectKBest(chi2, k=5).fit_transform(features_train_ar,labels_train_ar)
+kbestclf = SelectKBest(f_classif, k=7).fit(features_train_ar,labels_train_ar)
+
+# Get reduced feature set names
+print kbestclf.get_support()
+print kbestclf.scores_
+features_train_new = kbestclf.transform(features_train_ar)
+print features_train_new[1]
+
+features_test_new = kbestclf.transform(features_test_ar)
+
+from sklearn.decomposition import PCA
+# Apply PCA and Naive Bayes on the new feature set
 pca = decomposition.PCA()
-#clf = GaussianNB()
 clf = Pipeline(steps=[('pca', pca), ('gaussian_NB', GaussianNB())])
-n_components = [3, 5, 7, 9, 11, 13]
-clf = GridSearchCV(clf,
-                         dict(pca__n_components=n_components))
-from sklearn.tree import DecisionTreeClassifier
-#clf = DecisionTreeClassifier(random_state=0, min_samples_split=20)
-features_pred = clf.fit(features_train, labels_train).predict(features_test) 
+n_components = [5, 6, 7]
+clf = GridSearchCV(clf, dict(pca__n_components=n_components))
+clf = clf.fit(features_train_new, labels_train_ar)
 print "The number of components of the best estimator is ", clf.best_estimator_.named_steps['pca'].n_components
+
+## Apply Naive Bayes
+#from sklearn.naive_bayes import GaussianNB
+#clf = GaussianNB()
+#clf = clf.fit(features_train_new, labels_train)
+
+
+# Apply Decision Tree
+#from sklearn.tree import DecisionTreeClassifier
+#clf = DecisionTreeClassifier(random_state=0, min_samples_split=5, max_features=4)
+#clf = DecisionTreeClassifier(random_state=0, min_samples_split=5, max_features=7)
+#clf = clf.fit(features_train_new, labels_train)
+
+
+
+
+#features_test_new = kbestclf.transform(features_test)
+#features_pred = clf.predict(features_test_new) 
+#features_pred = clf.predict(features_test) 
+    
+### A Naive Bayes classifier combined with PCA is used and its accuracy is tested
+#from sklearn.decomposition import PCA
+#pca = decomposition.PCA()
+#pca_clf = pca.fit(features_train_ar, labels_train)
+
+
+
+
+#print "Explained Variance Ratio: ", pca_clf.explained_variance_ratio_
+#print "Components: ", pca_clf.components_
+#features_train_new = pca_clf.transform(features_train_ar)
+
+## Apply Naive Bayes
+#from sklearn.naive_bayes import GaussianNB
+#clf = GaussianNB()
+#clf = clf.fit(features_train_new, labels_train)
+
+
+
+
+#clf = GaussianNB()
+#clf = Pipeline(steps=[('pca', pca), ('gaussian_NB', GaussianNB())])
+#n_components = [3, 5, 7, 9]
+#clf = GridSearchCV(clf,
+#                         dict(pca__n_components=n_components))
+# from sklearn.tree import DecisionTreeClassifier
+#clf = DecisionTreeClassifier(random_state=0, min_samples_split=20)
+#clf = clf.fit(features_train, labels_train)
+#print "The feature mask is:", clf.get_support()
+#features_pred = clf.predict(features_test) 
+# print "The number of components of the best estimator is ", clf.best_estimator_.named_steps['pca'].n_components
+#print "The best parameters:", clf.best_params_
+#print "The best estimator", clf.best_estimator_.get_params(deep=True).gaussian_NB
+# best_est = RFE(clf.best_estimator_)
+# print "The best estimator:", best_est
+#estimator = clf
+#estimator = clf.named_steps['features'].get_feature_names()
+#print "The features are:", estimator
+#['features'].get_feature_names()
+# print estimator.named_steps['gaussian_NB'].get_support()
+#['features'].get_feature_names()
 #features_pred = clf.predict(features_test)    
     
 ### Feature selection using Decision Trees
