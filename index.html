@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Enron poi identifier by Inquisitive-Geek</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Enron poi identifier</h1>
+      <h2 class="project-tagline">Person of Interest Identification using Enron Dataset</h2>
+      <a href="https://github.com/Inquisitive-Geek/Enron_POI_Identifier" class="btn">View on GitHub</a>
+      <a href="https://github.com/Inquisitive-Geek/Enron_POI_Identifier/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/Inquisitive-Geek/Enron_POI_Identifier/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h3>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Introduction</h3>
+
+<p>The goal of this project is to build a person of interest identifier based on financial and email data made public as result of the Enron scandal. Since a hand-written list of persons of interest is available, we can use them to build a model which can act as guide to predict further persons of interest. The dataset has 146 records. Of them, 18 are POI’s and 128 are non-POI’s.
+There were a few outliers in the dataset. The first outlier was a spreadsheet aggregated value in the dataset – a dictionary key value called 'TOTAL'. It had to be removed from the dataset. Further analysis of the histograms of variables like ‘SALARY’ and ‘DEFERRAL PAYMENTS’ reveal that there are outliers whose salary is above 1 million and deferral payments are above 6 million. These are kept in the dataset as they might be potential POI’s.
+There are a lot of NaN values in the dataset which can be viewed by running my code. They are not removed though. They are converted to 0’s instead. The reason being that they are indicators of whether someone is a ‘poi’ or not. For eg., if the bonus value is NaN, it’s possible that the person is not a ‘poi’. It’s possible that it’s missing data but it’s unlikely as they are financial or message data in most cases whose data capturing is not be prone to human error.</p>
+
+<h3>
+<a id="features-engineered" class="anchor" href="#features-engineered" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features Engineered</h3>
+
+<p>I noticed that ‘total_stock_value’ was the sum of ‘exercised_stock_options’, ‘restricted_stock_deferred' and 'restricted_stock'. Hence I eliminated the other three.
+I engineered two features. The first one is monetary_incentive which is created as the sum of salary, bonus and deferral_payments. It gives an idea of the monetary incentives which a person gets and hence the higher chances of him to be a POI. The second one is poi_contact which is the sum of shared_receipt_with_poi, from_this_person_to_poi and from_poi_to_this_person. This gives an indication of the communication between a person of interest and some other person. The more this number, the likelier the person is to be a person of interest. The effect of the features has been tested. A PCA with Naïve Bayes model was built with and without the engineered features. The model performance with the engineered features was better than without it. It is documented in the table in the next section.
+Scaling of features is needed as the range of values is so different for different features that it might cause issues in the model. The performance
+K-best feature selection is used to select the 7 best features. The following 7 features are selected:
+'salary', 'total_payments','bonus', 'total_stock_value', 'total_payments', 'monetary_incentive', 'poi_contact'. Their corresponding scores are: 1.58060901e+01, 8.96271550e+00, 3.06522823e+01, 1.08146349e+01, 8.49349703e+00, 1.58060901e+01 and 1.06697374e+01. I could have picked lower number of features like removing salary and total_payments. But for the purpose of experimentation, I wanted to apply PCA further and remove such dependencies.</p>
+
+<h3>
+<a id="models-attempted" class="anchor" href="#models-attempted" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Models attempted</h3>
+
+<p>A comparison of model performance is given below:
+Model |Accuracy |Precision |Recall |F1 score |
+--- | --- | --- | --- | --- |
+PCA with Naïve Bayes (no engineered features) | 0.82293 | 0.34557 | 0.36700 | 0.35 |
+PCA with Naïve Bayes (with engineered features) | 0.83687 | 0.37563 | 0.37750 | 0.35554 |
+Decision Tree Classifier | 0.82233 | 0.18303 | 0.09600 | 0.12 |
+Naive Bayes | 0.81920 | 0.29517 | 0.25650 | 0.27448 |
+SelectKBest (K=5) with Naïve Bayes | 0.83873 | 0.36423 | 0.28100 | 0.31725 |
+SelectKBest (K=3) with Naïve Bayes | 0.83873 | 0.36423 | 0.28100 | 0.31725 |
+SelectKBest (K=3) with Decision Tree Classifier | 0.81047 | 0.28440 | 0.27800 | 0.28116 |
+SelectKBest (K=7) with Decision Tree Classifier | 0.82173 | 0.31110 | 0.27750 | 0.29334 |
+SelectKBest (K=6) with PCA and Naive Bayes | 0.84860 | 0.41803 | 0.34550 | 0.37832 |
+I ended up using the PCA with Naïve Bayes algorithm (with the engineered features) as it gave the required precision and recall scores along with good accuracy. </p>
+
+<h3>
+<a id="tuning-the-algorithm" class="anchor" href="#tuning-the-algorithm" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tuning the algorithm</h3>
+
+<p>Tuning the parameters of the algorithm mean trying out different values of the parameters to cater to varying requirements like speed, accuracy, complexity, etc. If not done well, then the algorithm could be slow or inaccurate. Since Naïve Bayes can’t be used, I was not able to tune it. 
+Had I used decision tree, I would have optimized the algorithm parameters such as max_depth and max_features by defining a list of values for it and passing it to GridSearchCV parameter param_grid. The best_params_ attribute of the output will give me the list of the best combination of parameters.
+Instead of tuning the parameters, I used GridSearchCV to tune the number of components of PCA. The number of components tried out were 5, 6 and 7. It turns out that a 5 component PCA works best in terms of accuracy after applying it to the reduced set of 7 features picked after feature reduction. 
+The model performance for different component values is documented below:
+Model |Accuracy |Precision |Recall |F1 score |
+--- | --- | --- | --- | --- |
+5 component 7 Best Tuned PCA with Naïve Bayes | 0.85307 | 0.42735 | 0.30000 | 0.31901 |
+6 component 7 Best Tuned PCA with Naïve Bayes | 0.84860 | 0.41803 | 0.34550 | 0.37832 |
+7 component 7 Best Tuned PCA with Naïve Bayes | 0.84487 | 0.40274 | 0.33850 | 0.36783 |</p>
+
+<h3>
+<a id="validation-and-evaluation" class="anchor" href="#validation-and-evaluation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Validation and Evaluation</h3>
+
+<p>Validation refers to testing our algorithm to a test data set and check its performance. Overfitting is a classic mistake that occurs if validation is done incorrectly. I split the dataset into a 70-30 training-test sets split. The model was fit on the training data set and the performance was checked by predicting values using the test data set and comparing it with the actual test set labels. 
+The evaluation metrics used for the model are shown below:
+Model |Accuracy |Precision |Recall |
+--- | --- | --- | --- |
+5 component 7 Best Tuned PCA with Naïve Bayes | 0.85307 | 0.42735 | 0.30000 |
+Accuracy refers to the ratio of correct predictions to the total number of observations.
+In this case, it means the proportion of the testing set labels correctly predicted. 
+Precision reflects the proportion of POI’s correctly predicted from the collection of POI’s predicted. Precision gives an indication of whether the algorithm does not overcommit in labelling someone as a POI. Recall refers to the proportion of POI’s correctly identified with the algorithm. Recall tells us if the algorithm has the ability to correctly identify a POI.</p>
+
+<h3>
+<a id="conclusion" class="anchor" href="#conclusion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conclusion</h3>
+
+<p>A pretty decent POI identifier has been built by combining PCA and Naive Bayes. Now, we can catch hold of any criminals in the Enron scandal pretty accurately! Beware Thugs!</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/Inquisitive-Geek/Enron_POI_Identifier">Enron poi identifier</a> is maintained by <a href="https://github.com/Inquisitive-Geek">Inquisitive-Geek</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
