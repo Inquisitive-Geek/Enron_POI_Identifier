@@ -38,19 +38,86 @@ K-best feature selection is used to select the 7 best features. The following 7 
 <h3>
 <a id="models-attempted" class="anchor" href="#models-attempted" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Models attempted</h3>
 
-<p>A comparison of model performance is given below:
-Model |Accuracy |Precision |Recall |F1 score |
---- | --- | --- | --- | --- |
-PCA with Naïve Bayes (no engineered features) | 0.82293 | 0.34557 | 0.36700 | 0.35 |
-PCA with Naïve Bayes (with engineered features) | 0.83687 | 0.37563 | 0.37750 | 0.35554 |
-Decision Tree Classifier | 0.82233 | 0.18303 | 0.09600 | 0.12 |
-Naive Bayes | 0.81920 | 0.29517 | 0.25650 | 0.27448 |
-SelectKBest (K=5) with Naïve Bayes | 0.83873 | 0.36423 | 0.28100 | 0.31725 |
-SelectKBest (K=3) with Naïve Bayes | 0.83873 | 0.36423 | 0.28100 | 0.31725 |
-SelectKBest (K=3) with Decision Tree Classifier | 0.81047 | 0.28440 | 0.27800 | 0.28116 |
-SelectKBest (K=7) with Decision Tree Classifier | 0.82173 | 0.31110 | 0.27750 | 0.29334 |
-SelectKBest (K=6) with PCA and Naive Bayes | 0.84860 | 0.41803 | 0.34550 | 0.37832 |
-I ended up using the PCA with Naïve Bayes algorithm (with the engineered features) as it gave the required precision and recall scores along with good accuracy. </p>
+<p>A comparison of model performance is given below:</p>
+
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PCA with Naïve Bayes (no engineered features)</td>
+<td>0.82293</td>
+<td>0.34557</td>
+<td>0.36700</td>
+<td>0.35</td>
+</tr>
+<tr>
+<td>PCA with Naïve Bayes (with engineered features)</td>
+<td>0.83687</td>
+<td>0.37563</td>
+<td>0.37750</td>
+<td>0.35554</td>
+</tr>
+<tr>
+<td>Decision Tree Classifier</td>
+<td>0.82233</td>
+<td>0.18303</td>
+<td>0.09600</td>
+<td>0.12</td>
+</tr>
+<tr>
+<td>Naive Bayes</td>
+<td>0.81920</td>
+<td>0.29517</td>
+<td>0.25650</td>
+<td>0.27448</td>
+</tr>
+<tr>
+<td>SelectKBest (K=5) with Naïve Bayes</td>
+<td>0.83873</td>
+<td>0.36423</td>
+<td>0.28100</td>
+<td>0.31725</td>
+</tr>
+<tr>
+<td>SelectKBest (K=3) with Naïve Bayes</td>
+<td>0.83873</td>
+<td>0.36423</td>
+<td>0.28100</td>
+<td>0.31725</td>
+</tr>
+<tr>
+<td>SelectKBest (K=3) with Decision Tree Classifier</td>
+<td>0.81047</td>
+<td>0.28440</td>
+<td>0.27800</td>
+<td>0.28116</td>
+</tr>
+<tr>
+<td>SelectKBest (K=7) with Decision Tree Classifier</td>
+<td>0.82173</td>
+<td>0.31110</td>
+<td>0.27750</td>
+<td>0.29334</td>
+</tr>
+<tr>
+<td>SelectKBest (K=6) with PCA and Naive Bayes</td>
+<td>0.84860</td>
+<td>0.41803</td>
+<td>0.34550</td>
+<td>0.37832</td>
+</tr>
+</tbody>
+</table>
+
+<p>I ended up using the PCA with Naïve Bayes algorithm (with the engineered features) as it gave the required precision and recall scores along with good accuracy. </p>
 
 <h3>
 <a id="tuning-the-algorithm" class="anchor" href="#tuning-the-algorithm" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tuning the algorithm</h3>
@@ -58,22 +125,69 @@ I ended up using the PCA with Naïve Bayes algorithm (with the engineered featur
 <p>Tuning the parameters of the algorithm mean trying out different values of the parameters to cater to varying requirements like speed, accuracy, complexity, etc. If not done well, then the algorithm could be slow or inaccurate. Since Naïve Bayes can’t be used, I was not able to tune it. 
 Had I used decision tree, I would have optimized the algorithm parameters such as max_depth and max_features by defining a list of values for it and passing it to GridSearchCV parameter param_grid. The best_params_ attribute of the output will give me the list of the best combination of parameters.
 Instead of tuning the parameters, I used GridSearchCV to tune the number of components of PCA. The number of components tried out were 5, 6 and 7. It turns out that a 5 component PCA works best in terms of accuracy after applying it to the reduced set of 7 features picked after feature reduction. 
-The model performance for different component values is documented below:
-Model |Accuracy |Precision |Recall |F1 score |
---- | --- | --- | --- | --- |
-5 component 7 Best Tuned PCA with Naïve Bayes | 0.85307 | 0.42735 | 0.30000 | 0.31901 |
-6 component 7 Best Tuned PCA with Naïve Bayes | 0.84860 | 0.41803 | 0.34550 | 0.37832 |
-7 component 7 Best Tuned PCA with Naïve Bayes | 0.84487 | 0.40274 | 0.33850 | 0.36783 |</p>
+The model performance for different component values is documented below:</p>
+
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 component 7 Best Tuned PCA with Naïve Bayes</td>
+<td>0.85307</td>
+<td>0.42735</td>
+<td>0.30000</td>
+<td>0.31901</td>
+</tr>
+<tr>
+<td>6 component 7 Best Tuned PCA with Naïve Bayes</td>
+<td>0.84860</td>
+<td>0.41803</td>
+<td>0.34550</td>
+<td>0.37832</td>
+</tr>
+<tr>
+<td>7 component 7 Best Tuned PCA with Naïve Bayes</td>
+<td>0.84487</td>
+<td>0.40274</td>
+<td>0.33850</td>
+<td>0.36783</td>
+</tr>
+</tbody>
+</table>
 
 <h3>
 <a id="validation-and-evaluation" class="anchor" href="#validation-and-evaluation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Validation and Evaluation</h3>
 
 <p>Validation refers to testing our algorithm to a test data set and check its performance. Overfitting is a classic mistake that occurs if validation is done incorrectly. I split the dataset into a 70-30 training-test sets split. The model was fit on the training data set and the performance was checked by predicting values using the test data set and comparing it with the actual test set labels. 
-The evaluation metrics used for the model are shown below:
-Model |Accuracy |Precision |Recall |
---- | --- | --- | --- |
-5 component 7 Best Tuned PCA with Naïve Bayes | 0.85307 | 0.42735 | 0.30000 |
-Accuracy refers to the ratio of correct predictions to the total number of observations.
+The evaluation metrics used for the model are shown below:</p>
+
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 component 7 Best Tuned PCA with Naïve Bayes</td>
+<td>0.85307</td>
+<td>0.42735</td>
+<td>0.30000</td>
+</tr>
+</tbody>
+</table>
+
+<p>Accuracy refers to the ratio of correct predictions to the total number of observations.
 In this case, it means the proportion of the testing set labels correctly predicted. 
 Precision reflects the proportion of POI’s correctly predicted from the collection of POI’s predicted. Precision gives an indication of whether the algorithm does not overcommit in labelling someone as a POI. Recall refers to the proportion of POI’s correctly identified with the algorithm. Recall tells us if the algorithm has the ability to correctly identify a POI.</p>
 
